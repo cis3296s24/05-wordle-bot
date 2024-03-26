@@ -25,4 +25,5 @@ Follow this project board to know the latest status of the project: [http://...]
 - Use InteliJ 11
 - Specify additional library to download if needed 
 - What file and target to compile and run. 
-- What is expected to happen when the app start. 
+- What is expected to happen when the app start.
+- Read and update Trello Board: https://trello.com/invite/b/kgPnZ9Vw/ATTI4fdd04872a6996894f783c838d52e8102DA1C2A7/wordlebot 
