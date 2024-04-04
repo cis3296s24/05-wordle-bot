@@ -31,7 +31,7 @@ To run the Wordle Discord Bot, follow these steps:
 
 To contribute to the development of the Wordle Discord Bot, follow the instructions on our project board available [here](https://temple-team-fykau2e3.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog).
 
-### How to Build
+## How to Build
 
 To build the Wordle Discord Bot from source, follow these steps:
 
