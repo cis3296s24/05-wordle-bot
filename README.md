@@ -2,7 +2,7 @@
 
 Wordle, the popular web-based word puzzle game, captivates players worldwide by challenging them to guess a five-letter word within six attempts. This game is renowned for its engaging gameplay and the instant feedback provided through a system of color-coded tiles, indicating the accuracy of the players' guesses. Expanding on this beloved concept, our project introduces an innovative iteration: a Discord bot version of Wordle. This new format allows players to enjoy the game within Discord servers, enhancing accessibility and integrating the puzzle into a social platform to attract a wider audience.
 
-![images.png](wordle.png)![Uploading wordle.png…]()
+![wordle.png](wordle.png)
 
 
 ## How to Run
