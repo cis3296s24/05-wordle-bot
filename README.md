@@ -37,7 +37,7 @@ To build the Wordle Discord Bot from source, follow these steps:
 
 - Clone this GitHub repository: [Wordle Discord Bot](https://github.com/cis3296s24/05-wordle-bot).
 - Choose the appropriate branch for your desired stability level or development stage.
-- Use IntelliJ for development.
+- Use IntelliJ 11 for development.
 - Ensure all necessary libraries are downloaded and configured.
-- Compile and run the main file (`wordle_bot_main.java`) to start the application.
+- Compile and run the main file to start the application.
 - Once done, the bot will initialize and be ready to use on your Discord server.
