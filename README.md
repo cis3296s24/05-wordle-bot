@@ -18,11 +18,21 @@ To run the Wordle Discord Bot, follow these steps:
     ```
     
 - Navigate to the directory where the Wordle Bot files are located.
-- Run the bot using the following command:
+- To install all needed dependencies, run:
     
     ```
-    ./wordle_bot
-    
+    npm install
+    ```
+- To run the wordle game (terminal-only in this release)
+
+    ```
+    node wordle.js
+    ```
+
+- To run the discord bot, featuring two commands:
+
+    ```
+    node index.js
     ```
     
 - The bot will be up and running on your Discord server.
