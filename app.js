@@ -77,12 +77,12 @@ function updateStreak(streak, id){
     let sql = 'UPDATE users SET win_streak = ? WHERE id = ?';
     let newStreak;
 
-    if(/**users lost */){
-        newStreak = 0;
-    }
-    else{
-        newStreak = streak + 1;
-    }
+    // if(/**users lost */){
+    //     newStreak = 0;
+    // }
+    // else{
+    //     newStreak = streak + 1;
+    // }
     db.run(sql, [newStreak, id], (err) =>{
         if (err) return console.error(err.message);
     });
