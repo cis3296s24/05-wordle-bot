@@ -1,8 +1,7 @@
 const Discord = require('discord.js');
 const sqlite3 = require('sqlite3').verbose();
 //const {token}= require('config.json');
-const token = 'MTIyNTEyMzIzMzYyODY4ODQ2Ng.Gp9oMu.aBNLVcbKUKUWx27uu4mNkjot45QVsW-yxR6qi0';
-//* token = MTIyNTEyMzIzMzYyODY4ODQ2Ng.Gp9oMu.aBNLVcbKUKUWx27uu4mNkjot45QVsW-yxR6qi0
+const token = "token";
 // Create a new Discord client
 const { Client, GatewayIntentBits } = require('discord.js')
 const client = new Client({
