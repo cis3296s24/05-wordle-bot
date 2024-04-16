@@ -9,7 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^14.14.1",
+    "discord.js": "^14.12.1",
+    "openai": "^4.35.0",
     "prompt-sync": "^4.2.0"
   },
   "devDependencies": {
