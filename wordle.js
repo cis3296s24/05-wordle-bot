@@ -105,6 +105,9 @@ async function main() {
         console.log(resultString);
         numLetters = 5 - (await countCorrect(resultString));
         numGuesses = numGuesses - 1;
+        if (numLetters == 0) {
+            break;
+        }
 
     }
 
