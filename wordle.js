@@ -2,6 +2,7 @@
 const fs = require('node:fs');
 const readline = require('readline');
 const prompt = require('prompt-sync')();
+const { OpenAI } = require("openai");
 
 async function wordArray() {
     const fileStream = fs.createReadStream('dictionary.txt');
@@ -23,7 +24,7 @@ async function wordArray() {
 
 async function guessMaker(array) {
     let guess = prompt('Guess a five letter word: ').toUpperCase();
-    while (guess.length != 5 || !array.includes(guess)) {
+    while (guess.length != 5) {
         if (guess.length != 5) {
             guess = prompt('Word not of correct length, please input again: ').toUpperCase();
         }
@@ -32,6 +33,31 @@ async function guessMaker(array) {
         }
     }
     return guess;
+}
+
+async function getRandom5LetterWordFromChatgpt() {
+
+    const openai = new OpenAI({
+        apiKey: 'API_SECRET_KEY'
+    });
+
+    try {
+        const chatCompletion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{"role": "user", "content": "Give me a random word that is exactly 5 letters long."}],
+          });
+          console.log(chatCompletion.choices[0].message);
+
+        // Extract the word from the response
+        const randomWord = chatCompletion.choices[0].message.content
+        
+        // console.log("Generated word:", randomWord);
+        return randomWord.trim().toUpperCase()
+         
+    } catch (error) {
+        console.error("Error generating word:", error);
+    }
+
 }
 
 // helper method to count number of G (correct) in a word
@@ -48,7 +74,9 @@ async function countCorrect(word) {
 // will have to modify in the future to accept shop parameters
 async function main() {
     const array = await wordArray();
-    const randomWord = array[Math.floor(Math.random() * array.length)];
+    // const randomWord = array[Math.floor(Math.random() * array.length)];
+    const randomWord = await getRandom5LetterWordFromChatgpt()
+    // console.log("retruned " +  randomWord)
     let numGuesses = 6;
     let numLetters = 5;
 
@@ -77,6 +105,9 @@ async function main() {
         console.log(resultString);
         numLetters = 5 - (await countCorrect(resultString));
         numGuesses = numGuesses - 1;
+        if (numLetters == 0) {
+            break;
+        }
 
     }
 
