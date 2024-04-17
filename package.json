@@ -9,7 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^14.12.1",
+    "bfg": "^0.3.0",
+    "bfs": "^1.0.0",
+    "discord.js": "^14.14.1",
+    "git-filter-repo": "^0.0.30",
+    "nfg": "^1.0.0",
     "openai": "^4.35.0",
     "prompt-sync": "^4.2.0"
   },
