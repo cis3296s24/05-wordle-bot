@@ -3,8 +3,8 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('reveal')
-        .setDescription('Purchase a feature to reveal the first letter in a game.'),
+        .setDescription('Reveal the first letter of the word in your next  game.'),
     async execute(interaction) {
-        await interaction.reply('Congrats, you now have the first letter of the word revealed for game of your choice.');
+        await interaction.reply('Revealing the first letter of the word in your next game.');
     },
 };
