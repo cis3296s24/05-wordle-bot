@@ -16,6 +16,8 @@
     "nfg": "^1.0.0",
     "openai": "^4.35.0",
     "prompt-sync": "^4.2.0"
+    "sqlite3": "^5.1.7"
+
   },
   "devDependencies": {
     "eslint": "^8.57.0"
