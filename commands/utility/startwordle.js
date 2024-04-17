@@ -1,13 +1,13 @@
 const { SlashCommandBuilder } = require('discord.js');
 const fs = require('node:fs');
-// const { OpenAI } = require('openai');
+const { OpenAI } = require('openai');
+const { apiKey } = require('../../config.json');
 
-// const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
-/*
+
 async function getRandom5LetterWordFromChatgpt() {
 
     const openai = new OpenAI({
-        apiKey: 'secret key',
+        apiKey: apiKey,
     });
 
     try {
@@ -27,7 +27,6 @@ async function getRandom5LetterWordFromChatgpt() {
     }
 
 }
-*/
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -36,12 +35,12 @@ module.exports = {
     async execute(interaction) {
         const dictionary = fs.readFileSync('dictionary.txt', 'utf-8').split('\n').filter(word => word.length === 5).map(word => word.toLowerCase());
         await interaction.reply(`Hi, ${interaction.user}. Starting a game of Wordle (15 minute time limit).`);
-        const randomWord = await dictionary[Math.floor(Math.random() * dictionary.length)];
+        const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
         // const randomWord = await getRandom5LetterWordFromChatgpt();
         let numGuesses = 6;
         await interaction.followUp(randomWord);
         const collectorFilter = message => message.content.length == 5 && interaction.user == message.author;
-        const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 900000 });
+        const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 90000 });
         const responseHistory = [];
         const guessHistory = [];
 
