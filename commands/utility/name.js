@@ -4,6 +4,6 @@ module.exports = {
         .setName('name')
         .setDescription('returns your discord name~'),
     async execute(interaction) {
-        await interaction.reply('hi');
+        await interaction.reply(`Hi ${interaction.user.username}`);
     },
 };

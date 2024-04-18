@@ -31,6 +31,6 @@ module.exports = {
         .setDescription('Displays the highest win rate in the server'),
     async execute(interaction) {
         let highestWin = await queryHighestWinRate();
-        await interaction.reply('The highest win rate in the server is ' + JSON.stringify(highestWin) );
+        await interaction.reply('The highest win rate in the server is ' + displayHighestWinRate(queryHighestWinRate()) );
     },
 };

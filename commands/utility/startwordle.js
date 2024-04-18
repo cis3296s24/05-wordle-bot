@@ -4,21 +4,32 @@ const { OpenAI } = require('openai');
 const { apiKey } = require('../../config.json');
 const sqlite3 = require('sqlite3').verbose();
 
-//* Connect to DB
+//* Connect to USER DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error(err.message);
 });
 
-//* Define the table schema
-db.serialize(() => {
-    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL)');
+//* Connect to DAILY DB
+const daily_db = new sqlite3.Database('./dailydata.db', sqlite3.OPEN_READWRITE, (err) => {
+    if (err) return console.error(err.message);
 });
 
+//* Define the table schemas
+db.serialize(() => {
+    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER)');
+});
+daily_db.serialize(() => {
+    db.run('CREATE TABLE IF NOT EXISTS dailyWordle(id INTEGER PRIMARY KEY, word_of_the_day VARCHAR, avail_points INTEGER');
+});
+///* working on this func
+function setDailyPoints(){
+    return Math.floor(Math.random() * 100);
+}
 
 //* Insert data into database
-function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate], (err) => {
+function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items) {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items], (err) => {
         if (err) return console.error(err.message);
     });
 }
@@ -69,10 +80,18 @@ async function updateStreak(streak, id, outcome){
 }
 //* UPDATE points
 async function updatePoints(points, id){
-    let sql = 'UPDATE users SET losses = ? WHERE id = ?';
-    let newTotal = await points;
-    newTotal = newTotal + 1;
+    let sql = 'UPDATE users SET points = ? WHERE id = ?';
+    let newTotal = (await points) + Math.floor(Math.random() * 100);
     db.run(sql, [newTotal, id], (err) =>{
+        if (err) return console.error(err.message);
+    });
+}
+//* UPDATE last word
+async function updateLastWords(lastWord, id){
+    let sql = 'UPDATE users SET last_word = ? WHERE id = ?';
+    let newWord = await lastWord;;
+    
+    db.run(sql, [newWord, id], (err) =>{
         if (err) return console.error(err.message);
     });
 }
@@ -108,6 +127,35 @@ function queryWin(id){
                 reject(err);
             }
                 resolve(rows[0].wins);
+        });
+    });
+}
+function queryGuesses(id){
+
+    return new Promise((resolve,reject) => {
+        let sql
+        sql = ' SELECT guesses FROM users WHERE id = ?';
+        db.all(sql, [id], (err,rows)   => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            }
+                resolve(rows[0].guesses);
+        });
+    });
+}
+
+function queryItems(id){
+
+    return new Promise((resolve,reject) => {
+        let sql
+        sql = ' SELECT items FROM users WHERE id = ?';
+        db.all(sql, [id], (err,rows)   => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            }
+                resolve(rows[0].items);
         });
     });
 }
@@ -267,9 +315,11 @@ module.exports = {
                 await interaction.followUp(response);
                 if (guessContents == randomWord) {
                     interaction.followUp('you win');
+                    updateLastWords(randomWord,interaction.user.id);
                     updateWin(queryWin(interaction.user.id),interaction.user.id);
                     updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,true);
+                    updatePoints(queryPoints(interaction.user.id), interaction.user.id);
                     collector.stop();
                 }
                 else if (numGuesses == 0) {
