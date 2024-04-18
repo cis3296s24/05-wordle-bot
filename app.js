@@ -19,7 +19,7 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
 
 // Define the table schema
 db.serialize(() => {
-    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER)');
+    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL)');
 });
 
 // Event listener for when the bot is ready
@@ -36,15 +36,15 @@ client.on('messageCreate', (message) => {
 
     // Store the data into the SQLite database
     //console.log(message);
-    insertUser(message.member.id, message.member.user.username, 0, 0, 0, 0, 0); // assuming initial values for wins, losses, points, score, streak
+    insertUser(message.member.id, message.member.user.username, 0, 0, 0, 0, 0, null, 0.0); // assuming initial values for wins, losses, points, score, streak
 });
 
 client.login(token);
 
 
 //* Insert data into database
-function insertUser(id, username, wins, losses, points, score, streak) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak) VALUES (?, ?, ?, ?, ?, ?, ?)';
+function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate) {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
     db.run(sql, [id, username, wins, losses, points, score, streak], (err) => {
         if (err) return console.error(err.message);
     });
