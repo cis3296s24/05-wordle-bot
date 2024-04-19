@@ -20,6 +20,7 @@ function queryPoints(id){
         });
     });
 }
+
 //* UPDATE points
 async function updatePointsAfterReveal(points, id){
     let sql = 'UPDATE users SET points = ? WHERE id = ?';
@@ -51,11 +52,13 @@ function queryReveal(id){
         });
     });
 }
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('buy_reveal')
         .setDescription('Purchase a feature to reveal the first letter in a game.'),
     async execute(interaction) {
+=
 
         if((await queryPoints(interaction.user.id)) < 50){
             await interaction.reply('Sorry you do not have enough points to buy a reveal.');
@@ -65,5 +68,6 @@ module.exports = {
             updatePointsAfterReveal(queryPoints(interaction.user.id),interaction.user.id);
             await interaction.reply('Congrats, you now have the first letter of the word revealed for game of your choice.');
         }
+
     },
 };

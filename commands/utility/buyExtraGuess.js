@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const sqlite3 = require('sqlite3').verbose();
 let numGuesses = require('./startwordle.js');
 
+
 //* Connect to USER DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error(err.message);
@@ -54,7 +55,7 @@ function queryGuess(id){
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('buy_extra_guess')
-        .setDescription('Purchase an extra guess for game.'),
+        .setDescription('Purchase an extra guess for game.'), 
     async execute(interaction) {
         if((await queryPoints(interaction.user.id)) < 100){
             await interaction.reply('Sorry you do not have enough points to buy a guess');
@@ -65,5 +66,6 @@ module.exports = {
             numGuesses++;
             await interaction.reply('Congrats, you now have an extra guess for a game of your choice.');
         }
+
     },
 };
