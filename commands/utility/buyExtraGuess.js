@@ -1,5 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { execute } = require('../../events/ready');
+const sqlite3 = require('sqlite3');
+
 
 // Connect to DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
@@ -25,6 +27,8 @@ module.exports = {
         .setName('buy_extra_guess')
         .setDescription('Purchase an extra guess for game.'), 
     async execute(interaction) {
-        await interaction.reply('Congrats, you bought an extra guess for a game of your choice. \nYou now have ' + await queryGuesses() + ".");
+        const userId = interaction.user.id;
+        const extraGuesses = await queryGuesses(userId);
+        await interaction.reply('Congrats, you bought an extra guess for a game of your choice. \nYou now have  ${extraGuesses} guesses.');
     },
 };
