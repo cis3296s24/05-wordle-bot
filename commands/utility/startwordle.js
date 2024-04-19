@@ -28,8 +28,8 @@ function setDailyPoints(){
 
 //* Insert data into database
 function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items], (err) => {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, reveals, items) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,reveals,items], (err) => {
         if (err) return console.error(err.message);
     });
 }
@@ -130,6 +130,7 @@ function queryWin(id){
         });
     });
 }
+
 function queryGuesses(id){
 
     return new Promise((resolve,reject) => {
@@ -144,6 +145,22 @@ function queryGuesses(id){
         });
     });
 }
+
+function queryReveals(id){
+
+    return new Promise((resolve,reject) => {
+        let sql
+        sql = ' SELECT reveals FROM users WHERE id = ?';
+        db.all(sql, [id], (err,rows)   => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            }
+                resolve(rows[0].guesses);
+        });
+    });
+}
+
 
 function queryItems(id){
 

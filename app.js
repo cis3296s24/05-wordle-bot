@@ -3,7 +3,8 @@ const sqlite3 = require('sqlite3').verbose();
 //const {token}= require('config.json');
 const token = "token";
 // Create a new Discord client
-const { Client, GatewayIntentBits } = require('discord.js')
+const { Client, GatewayIntentBits } = require('discord.js');
+const buyExtraGuess = require('./commands/utility/buyExtraGuess');
 const client = new Client({
     intents: [
         Discord.IntentsBitField.Flags.Guilds,
@@ -12,6 +13,7 @@ const client = new Client({
         //Discord.IntentsBitField.Flags.MessageContent,
     ]
 })
+
 // Connect to DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error(err.message);
@@ -19,7 +21,7 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
 
 // Define the table schema
 db.serialize(() => {
-    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL)');
+    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, extraGuesses INTEGER, reveals INTEGER)');
 });
 
 // Event listener for when the bot is ready
@@ -36,7 +38,7 @@ client.on('messageCreate', (message) => {
 
     // Store the data into the SQLite database
     //console.log(message);
-    insertUser(message.member.id, message.member.user.username, 0, 0, 0, 0, 0, null, 0.0); // assuming initial values for wins, losses, points, score, streak
+    insertUser(message.member.id, message.member.user.username, 0, 0, 0, 0, 0, null, 0.0, 0, 0); // assuming initial values for wins, losses, points, score, streak, extraGuesses, reveals
 });
 
 client.login(token);
@@ -44,8 +46,8 @@ client.login(token);
 
 //* Insert data into database
 function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    db.run(sql, [id, username, wins, losses, points, score, streak], (err) => {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, extraGuesses, reveals) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    db.run(sql, [id, username, wins, losses, points, score, streak, extraGuesses, reveals], (err) => {
         if (err) return console.error(err.message);
     });
 }
@@ -87,6 +89,25 @@ function updateStreak(streak, id){
     });
 
 }
+
+//* UPDATE extraGuesess
+function updateGuesses(extraGuesses, id){
+    let sql = 'UPDATE users SET extraGuesses = ? WHERE id = ?';
+    let newGuesses = extraGuesses + 1;
+    db.run(sql, [newGuesses, id], (err) =>{
+        if (err) return console.error(err.message);
+    });
+}
+
+//* UPDATE reveals
+function updateGuesses(reveals, id){
+    let sql = 'UPDATE users SET reveals = ? WHERE id = ?';
+    let newReveals = reveals + 1;
+    db.run(sql, [newReveals, id], (err) =>{
+        if (err) return console.error(err.message);
+    });
+}
+
 // sql = 'UPDATE users SET username = ? WHERE id = ?';
 // db.run(sql, ['Jake', 1], (err) =>{
 //     if (err) return console.error(err.message);
