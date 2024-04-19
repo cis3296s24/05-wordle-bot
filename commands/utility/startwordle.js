@@ -259,9 +259,10 @@ module.exports = {
     async execute(interaction) {
         const dictionary = fs.readFileSync('dictionary.txt', 'utf-8').split('\n').filter(word => word.length === 5).map(word => word.toLowerCase());
         await interaction.reply(`Hi, ${interaction.user}. Starting a game of Wordle (15 minute time limit).`);
-        const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+        const randomWord = (await queryLastWord(1));
+        //const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
         // const randomWord = await getRandom5LetterWordFromChatgpt();
-        let numGuesses = 6;
+        let numGuesses = (await queryGuesses(1));
         await interaction.followUp(randomWord);
         //inserting user into db
         insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0,null,0.0);
