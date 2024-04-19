@@ -28,9 +28,11 @@ function setDailyPoints(){
 }
 
 //* Insert data into database
-function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, betting) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals,betting,) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+
+function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, betting,) {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals,betting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items, reveals, betting], (err) => {
+
         if (err) return console.error(err.message);
     });
 }
@@ -122,26 +124,13 @@ async function updateLastWords(lastWord, id){
         if (err) return console.error(err.message);
     });
 }
+
 //* DELETE data
 function deleteUser(id){
     let sql;
     sql = 'DELETE FROM users WHERE id = ?'
     db.run(sql, [id], (err) =>{
         if (err) return console.error(err.message);
-    });
-}
-//* query Users Wins
-function queryBetAnsw(id){
-    return new Promise((resolve,reject) => {
-        let sql
-        sql = ' SELECT betting FROM users WHERE id = ?';
-        db.all(sql, [id], (err,rows)   => {
-            if (err) {
-                console.error(err.message);
-                reject(err);
-            }
-                resolve(rows[0].betting);
-        });
     });
 }
 //* Query User data
@@ -169,8 +158,23 @@ function queryWin(id){
         });
     });
 }
+//* query Users Wins
+function queryBetAnsw(id){
+    return new Promise((resolve,reject) => {
+        let sql
+        sql = ' SELECT betting FROM users WHERE id = ?';
+        db.all(sql, [id], (err,rows)   => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            }
+                resolve(rows[0].betting);
+        });
+    });
+}
 
 function queryGuesses(id){
+
     return new Promise((resolve,reject) => {
         let sql
         sql = ' SELECT guesses FROM users WHERE id = ?';
@@ -183,7 +187,7 @@ function queryGuesses(id){
         });
     });
 }
-// Query reveals
+
 function queryReveals(id){
 
     return new Promise((resolve,reject) => {
@@ -199,8 +203,9 @@ function queryReveals(id){
     });
 }
 
-// Query Items
+
 function queryItems(id){
+
     return new Promise((resolve,reject) => {
         let sql
         sql = ' SELECT items FROM users WHERE id = ?';
@@ -213,7 +218,6 @@ function queryItems(id){
         });
     });
 }
-// Query Points
 function queryPoints(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -227,7 +231,6 @@ function queryPoints(id){
         });
     });
 }
-// Query win streak
 function queryWinStreak(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -241,7 +244,6 @@ function queryWinStreak(id){
         });
     });
 }
-// Query last word
 function queryLastWord(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -275,36 +277,6 @@ function queryWinRate(id){
     return new Promise((resolve,reject) => {
         let sql
         sql = ' SELECT win_rate FROM users WHERE id = ?';
-        db.all(sql, [id], (err,rows)   => {
-            if (err) {
-                console.error(err.message);
-                reject(err);
-            }
-                resolve(rows[0].win_rate);
-        });
-    });
-    
-}
-//* query Users use of extra quess
-function queryGuesses(id){
-    return new Promise((resolve,reject) => {
-        let sql
-        sql = ' SELECT useGuess FROM users WHERE id = ?';
-        db.all(sql, [id], (err,rows)   => {
-            if (err) {
-                console.error(err.message);
-                reject(err);
-            }
-                resolve(rows[0].win_rate);
-        });
-    });
-    
-}
-//* query Users use of reveal letter
-function queryReveal(id){
-    return new Promise((resolve,reject) => {
-        let sql
-        sql = ' SELECT useReveal FROM users WHERE id = ?';
         db.all(sql, [id], (err,rows)   => {
             if (err) {
                 console.error(err.message);
@@ -350,16 +322,6 @@ module.exports = {
         const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
         // const randomWord = await getRandom5LetterWordFromChatgpt();
         let numGuesses = 6;
-        //let checkGuess = await queryGuesses();
-        //let numGuesses = 0;
-        
-        /*if(checkGuess == 1) {
-            numGuesses = 7;
-        }
-        else {
-            numGuesses = 6;
-        }
-        */
         await interaction.followUp(randomWord);
         //inserting user into db
         insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0,null,0.0);

@@ -40,14 +40,9 @@ module.exports = {
 
         collector.on('collect', async (betValue) => {
             betAns = (betValue.content);
-            if((await queryPoints(interaction.user.id)) < betAns){
-                await interaction.reply('Sorry you do not have enough points to wager ' + betAns + ". Your maximum wager is the amount of points you have.");
-            }
-            else {
-                interaction.followUp(`your bet is ${betAns}.`);
-                console.log(betAns);
-                updateBetting(betAns, interaction.user.id);
-            }
+            interaction.followUp(`your bet is ${betAns}.`);
+            console.log(betAns);
+            updateBetting(betAns, interaction.user.id);
             collector.stop();
         });
 
