@@ -11,7 +11,7 @@
   "dependencies": {
     "bfg": "^0.3.0",
     "bfs": "^1.0.0",
-    "discord.js": "^14.14.1",
+    "discord.js": "^14.12.1",
     "git-filter-repo": "^0.0.30",
     "nfg": "^1.0.0",
     "openai": "^4.37.1",
