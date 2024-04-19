@@ -1,9 +1,9 @@
 const { SlashCommandBuilder } = require('discord.js');
 
-function queryReveals(id){
+function queryReveals(){
     return new Promise((resolve,reject) => {
         let sql
-        sql = ' SELECT reveals FROM users WHERE id = ?';
+        sql = ' SELECT reveals FROM users';
         db.all(sql, [id], (err,rows)   => {
             if (err) {
                 console.error(err.message);
@@ -19,6 +19,6 @@ module.exports = {
         .setName('buy_reveal')
         .setDescription('Purchase a feature to reveal the first letter in a game.'),
     async execute(interaction) {
-        await interaction.reply('Congrats, you bought a reveal of the first letter of the word revealed for game of your choice.\nYou now have '+ queryReveals + '.');
+        await interaction.reply('Congrats, you bought a reveal of the first letter of the word revealed for game of your choice.\nYou now have '+ await queryReveals() + '.');
     },
 };
