@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { execute } = require('../../events/ready');
+const sqlite3 = require('sqlite3').verbose();
 
 // Connect to DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
