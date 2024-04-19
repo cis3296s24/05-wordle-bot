@@ -28,9 +28,9 @@ function setDailyPoints(){
 }
 
 //* Insert data into database
-function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, reveals, items) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,reveals,items], (err) => {
+function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, betting,) {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals,betting,) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items, reveals, betting], (err) => {
         if (err) return console.error(err.message);
     });
 }
@@ -128,6 +128,20 @@ function deleteUser(id){
     sql = 'DELETE FROM users WHERE id = ?'
     db.run(sql, [id], (err) =>{
         if (err) return console.error(err.message);
+    });
+}
+//* query Users Wins
+function queryBetAnsw(id){
+    return new Promise((resolve,reject) => {
+        let sql
+        sql = ' SELECT betting FROM users WHERE id = ?';
+        db.all(sql, [id], (err,rows)   => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            }
+                resolve(rows[0].betting);
+        });
     });
 }
 //* Query User data
@@ -335,14 +349,17 @@ module.exports = {
         await interaction.reply(`Hi, ${interaction.user}. Starting a game of Wordle (15 minute time limit).`);
         const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
         // const randomWord = await getRandom5LetterWordFromChatgpt();
-        let checkGuess = await queryGuesses();
-        let numGuesses = 0;
-        if(checkGuess == 1) {
+        let numGuesses = 6;
+        //let checkGuess = await queryGuesses();
+        //let numGuesses = 0;
+        
+        /*if(checkGuess == 1) {
             numGuesses = 7;
         }
         else {
             numGuesses = 6;
         }
+        */
         await interaction.followUp(randomWord);
         //inserting user into db
         insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0,null,0.0);
