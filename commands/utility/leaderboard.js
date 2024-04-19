@@ -9,20 +9,16 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
 function queryHighestWinRate(){
     return new Promise((resolve,reject) => {
         let sql
-        sql = ' SELECT MAX(win_rate) FROM users';
+        sql = ' SELECT MAX(win_rate) AS max_win_rate FROM users';
         db.all(sql, [], (err,rows)   => {
             if (err) {
                 console.error(err.message);
                 reject(err);
             }
-                resolve(rows[0].win_rate);
+                resolve(rows[0].max_win_rate);
         });
     });
     
-}
-async function displayHighestWinRate(data){
-    let highestUser = await data;
-    return highestUser;
 }
 
 module.exports = {
@@ -30,7 +26,6 @@ module.exports = {
         .setName('leaderboard')
         .setDescription('Displays the highest win rate in the server'),
     async execute(interaction) {
-        let highestWin = await queryHighestWinRate();
-        await interaction.reply('The highest win rate in the server is ' + displayHighestWinRate(queryHighestWinRate()) );
+        await interaction.reply('The highest win rate in the server is ' + (await queryHighestWinRate())+ '%' );
     },
 };
