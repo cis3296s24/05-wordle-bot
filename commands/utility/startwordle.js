@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const fs = require('node:fs');
 const { OpenAI } = require('openai');
 const { apiKey } = require('../../config.json');
+const bet = require('./bet');
 const sqlite3 = require('sqlite3').verbose();
 
 //* Connect to USER DB
@@ -16,7 +17,7 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
 
 //* Define the table schemas
 db.serialize(() => {
-    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER)');
+    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER, betting VARCHAR)');
 });
 // daily_db.serialize(() => {
 //     db.run('CREATE TABLE IF NOT EXISTS dailyWordle(id INTEGER PRIMARY KEY, word_of_the_day VARCHAR, avail_points INTEGER');
@@ -28,9 +29,9 @@ function setDailyPoints(){
 
 //* Insert data into database
 
-function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals,) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items, reveals], (err) => {
+function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, betting,) {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals,betting,) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items, reveals, betting], (err) => {
 
         if (err) return console.error(err.message);
     });
@@ -81,10 +82,36 @@ async function updateStreak(streak, id, outcome){
     });
 }
 //* UPDATE points
-async function updatePoints(points, id){
+async function updatePoints(points, betting, id,win){
+    let totalNewPoints;
+    totalNewPoints= (await points);
+    let bettingAnsw=await(betting);
+    console.log(bettingAnsw,win);
+
+    if(win==false && bettingAnsw=="no"){
+        return;
+    }
+
     let sql = 'UPDATE users SET points = ? WHERE id = ?';
-    let newTotal = (await points) + Math.floor(Math.random() * 100);
-    db.run(sql, [newTotal, id], (err) =>{
+    // let newTotal = (await points) + Math.floor(Math.random() * 100);
+    if(win && bettingAnsw=="yes"){
+      
+      totalNewPoints*=2;
+    }
+    else if (bettingAnsw=="yes" && win==false){
+        totalNewPoints=0;
+    }
+    
+    else{
+        //this is wining and not betting
+        totalNewPoints = (await points) + 2;
+
+    }
+    let sql2 = 'UPDATE users SET betting = "no" WHERE id = ?';
+    db.run(sql2, [id], (err) =>{
+        if (err) return console.error(err.message);
+    });
+    db.run(sql, [totalNewPoints, id], (err) =>{
         if (err) return console.error(err.message);
     });
 }
@@ -128,6 +155,20 @@ function queryWin(id){
                 reject(err);
             }
                 resolve(rows[0].wins);
+        });
+    });
+}
+//* query Users Wins
+function queryBetAnsw(id){
+    return new Promise((resolve,reject) => {
+        let sql
+        sql = ' SELECT betting FROM users WHERE id = ?';
+        db.all(sql, [id], (err,rows)   => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            }
+                resolve(rows[0].betting);
         });
     });
 }
@@ -337,7 +378,7 @@ module.exports = {
                     updateWin(queryWin(interaction.user.id),interaction.user.id);
                     updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,true);
-                    updatePoints(queryPoints(interaction.user.id), interaction.user.id);
+                    updatePoints(queryPoints(interaction.user.id),queryBetAnsw(interaction.user.id), interaction.user.id,true);
                     collector.stop();
                 }
                 else if (numGuesses == 0) {
@@ -346,6 +387,8 @@ module.exports = {
                     updateLoss(queryLoss(interaction.user.id),interaction.user.id);
                     updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,false);
+                    updatePoints(queryPoints(interaction.user.id),queryBetAnsw(interaction.user.id), interaction.user.id,false);
+
                     collector.stop();
                 }
 
