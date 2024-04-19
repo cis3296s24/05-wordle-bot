@@ -19,6 +19,6 @@ module.exports = {
         .setName('buy_reveal')
         .setDescription('Purchase a feature to reveal the first letter in a game.'),
     async execute(interaction) {
-        await interaction.reply('Congrats, you bought a reveal of the first letter of the word revealed for game of your choice.');
+        await interaction.reply('Congrats, you bought a reveal of the first letter of the word revealed for game of your choice.\nYou now have '+ queryReveals + '.');
     },
 };
