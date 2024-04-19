@@ -56,7 +56,7 @@ module.exports = {
             for (let i=0; i<4; i++){
                 squareArray.push(':black_large_square:');
             }
-            await interaction.reply('Revealing the first letter of the word in your next game:\n ' + (wordOfDay[0])+'\n' + squareArray.join(""));
+            await interaction.reply('Revealing the first letter of the word in your next game:\n ' + (wordOfDay[0])+'\n' + squareArray.join("")+ '\nYou now have ' + (await queryReveal(interaction.user.id))+ ' reveals left');
         }
         else{
             await interaction.reply('You do not have a reveal.');

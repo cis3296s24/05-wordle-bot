@@ -3,31 +3,22 @@ const fs = require('node:fs');
 const { OpenAI } = require('openai');
 const { apiKey } = require('../../config.json');
 const sqlite3 = require('sqlite3').verbose();
-
+const ADMIN = 1;
 //* Connect to USER DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error(err.message);
 });
 
-// //* Connect to DAILY DB
-// const daily_db = new sqlite3.Database('./dailydata.db', sqlite3.OPEN_READWRITE, (err) => {
-//     if (err) return console.error(err.message);
-// });
-
 //* Define the table schemas
 db.serialize(() => {
     db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER)');
 });
-// daily_db.serialize(() => {
-//     db.run('CREATE TABLE IF NOT EXISTS dailyWordle(id INTEGER PRIMARY KEY, word_of_the_day VARCHAR, avail_points INTEGER');
-// });
 ///* working on this func
 function setDailyPoints(){
     return Math.floor(Math.random() * 100);
 }
 
 //* Insert data into database
-
 function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals,) {
     let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items, reveals], (err) => {
@@ -83,7 +74,7 @@ async function updateStreak(streak, id, outcome){
 //* UPDATE points
 async function updatePoints(points, id){
     let sql = 'UPDATE users SET points = ? WHERE id = ?';
-    let newTotal = (await points) + Math.floor(Math.random() * 100);
+    let newTotal = (await points) + (await queryPoints(ADMIN));
     db.run(sql, [newTotal, id], (err) =>{
         if (err) return console.error(err.message);
     });
@@ -131,9 +122,8 @@ function queryWin(id){
         });
     });
 }
-
+// * QUERY user guesses
 function queryGuesses(id){
-
     return new Promise((resolve,reject) => {
         let sql
         sql = ' SELECT guesses FROM users WHERE id = ?';
@@ -146,7 +136,7 @@ function queryGuesses(id){
         });
     });
 }
-
+// * QUERY users reveals
 function queryReveals(id){
 
     return new Promise((resolve,reject) => {
@@ -164,7 +154,6 @@ function queryReveals(id){
 
 
 function queryItems(id){
-
     return new Promise((resolve,reject) => {
         let sql
         sql = ' SELECT items FROM users WHERE id = ?';
@@ -278,10 +267,10 @@ module.exports = {
     async execute(interaction) {
         const dictionary = fs.readFileSync('dictionary.txt', 'utf-8').split('\n').filter(word => word.length === 5).map(word => word.toLowerCase());
         await interaction.reply(`Hi, ${interaction.user}. Starting a game of Wordle (15 minute time limit).`);
-        const randomWord = (await queryLastWord(1));
+        const randomWord = (await queryLastWord(ADMIN));
         //const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
         // const randomWord = await getRandom5LetterWordFromChatgpt();
-        let numGuesses = (await queryGuesses(1));
+        let numGuesses = (await queryGuesses(ADMIN));
         await interaction.followUp(randomWord);
         //inserting user into db
         insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0,null,0.0);
