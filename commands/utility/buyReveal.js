@@ -1,5 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js');
 
+// Connect to DB
+const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
+    if (err) return console.error(err.message);
+});
+
 function queryReveals(){
     return new Promise((resolve,reject) => {
         let sql
