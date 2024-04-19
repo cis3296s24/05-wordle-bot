@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const fs = require('node:fs');
 const { OpenAI } = require('openai');
 const { apiKey } = require('../../config.json');
+const bet = require('./bet');
 const sqlite3 = require('sqlite3').verbose();
 
 //* Connect to USER DB
@@ -9,18 +10,18 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
     if (err) return console.error(err.message);
 });
 
-//* Connect to DAILY DB
-const daily_db = new sqlite3.Database('./dailydata.db', sqlite3.OPEN_READWRITE, (err) => {
-    if (err) return console.error(err.message);
-});
+// //* Connect to DAILY DB
+// const daily_db = new sqlite3.Database('./dailydata.db', sqlite3.OPEN_READWRITE, (err) => {
+//     if (err) return console.error(err.message);
+// });
 
 //* Define the table schemas
 db.serialize(() => {
-    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, useExtra INTEGER, useReveal INTEGER)');
+    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER, betting VARCHAR)');
 });
-daily_db.serialize(() => {
-    db.run('CREATE TABLE IF NOT EXISTS dailyWordle(id INTEGER PRIMARY KEY, word_of_the_day VARCHAR, avail_points INTEGER');
-});
+// daily_db.serialize(() => {
+//     db.run('CREATE TABLE IF NOT EXISTS dailyWordle(id INTEGER PRIMARY KEY, word_of_the_day VARCHAR, avail_points INTEGER');
+// });
 ///* working on this func
 function setDailyPoints(){
     return Math.floor(Math.random() * 100);
@@ -28,8 +29,8 @@ function setDailyPoints(){
 
 //* Insert data into database
 function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, reveals, items, useGuesses, useReveals) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    db.run(sql, [id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, reveals, items, useGuess, useReveal], (err) => {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, reveals, items) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,reveals,items], (err) => {
         if (err) return console.error(err.message);
     });
 }
@@ -39,7 +40,7 @@ async function updateWinRate(wins, losses, id){
     let sql = 'UPDATE users SET win_rate = ? WHERE id = ?';
     let aWin = await wins;
     let aLoss = await losses;
-    let newWinRate = (aWin/(aWin+aLoss)) * 100;
+    let newWinRate = Math.floor((aWin/(aWin+aLoss)) * 100);
 
     db.run(sql, [newWinRate, id], (err) =>{
         if (err) return console.error(err.message);
@@ -79,10 +80,36 @@ async function updateStreak(streak, id, outcome){
     });
 }
 //* UPDATE points
-async function updatePoints(points, id){
+async function updatePoints(points, betting, id,win){
+    let totalNewPoints;
+    totalNewPoints= (await points);
+    let bettingAnsw=await(betting);
+    console.log(bettingAnsw,win);
+
+    if(win==false && bettingAnsw=="no"){
+        return;
+    }
+
     let sql = 'UPDATE users SET points = ? WHERE id = ?';
-    let newTotal = (await points) + Math.floor(Math.random() * 100);
-    db.run(sql, [newTotal, id], (err) =>{
+    // let newTotal = (await points) + Math.floor(Math.random() * 100);
+    if(win && bettingAnsw=="yes"){
+      
+      totalNewPoints*=2;
+    }
+    else if (bettingAnsw=="yes" && win==false){
+        totalNewPoints=0;
+    }
+    
+    else{
+        //this is wining and not betting
+        totalNewPoints = (await points) + 2;
+
+    }
+    let sql2 = 'UPDATE users SET betting = "no" WHERE id = ?';
+    db.run(sql2, [id], (err) =>{
+        if (err) return console.error(err.message);
+    });
+    db.run(sql, [totalNewPoints, id], (err) =>{
         if (err) return console.error(err.message);
     });
 }
@@ -116,7 +143,6 @@ function queryData(){
 }
 //* query Users Wins
 function queryWin(id){
-
     return new Promise((resolve,reject) => {
         let sql
         sql = ' SELECT wins FROM users WHERE id = ?';
@@ -129,7 +155,7 @@ function queryWin(id){
         });
     });
 }
-// Query extra guesses
+
 function queryGuesses(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -373,14 +399,17 @@ module.exports = {
                     updateWin(queryWin(interaction.user.id),interaction.user.id);
                     updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,true);
-                    updatePoints(queryPoints(interaction.user.id), interaction.user.id);
+                    updatePoints(queryPoints(interaction.user.id),queryBetAnsw(interaction.user.id), interaction.user.id,true);
                     collector.stop();
                 }
                 else if (numGuesses == 0) {
                     interaction.followUp(`you lose. the word was ${randomWord}`);
+                    updateLastWords(randomWord,interaction.user.id);
                     updateLoss(queryLoss(interaction.user.id),interaction.user.id);
                     updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,false);
+                    updatePoints(queryPoints(interaction.user.id),queryBetAnsw(interaction.user.id), interaction.user.id,false);
+
                     collector.stop();
                 }
 
