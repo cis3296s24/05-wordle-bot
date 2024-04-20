@@ -259,6 +259,19 @@ async function getRandom5LetterWordFromChatgpt() {
     }
 
 }
+async function updateItem(items, id, used){
+    let sql = 'UPDATE users SET items = ? WHERE id = ?';
+    let newItems = await items;
+    if(used){
+        newItems = newItems -1;
+    }
+    else{
+        newItems = newItems + 1;
+    }
+    db.run(sql, [newItems, id], (err) =>{
+        if (err) return console.error(err.message);
+    });
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -277,14 +290,13 @@ module.exports = {
         let numGuesses = (await queryGuesses(ADMIN));
         //await interaction.followUp(randomWord);
         //inserting user into db
-        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0,null,0.0);
+        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0,null,0.0,0,0,0);
         const collectorFilter = message => message.content.length == 5 && interaction.user == message.author;
         const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 90000 });
         const responseHistory = [];
         const guessHistory = [];
 
         collector.on('collect', async (guess) => {
-
             const guessContents = guess.content.toLowerCase();
             if (!dictionary.includes(guessContents)) {
                 interaction.followUp('invalid guess, try again: ');
@@ -293,6 +305,11 @@ module.exports = {
                 interaction.followUp('repeat guess, try again: ');
             }
             else {
+                //* v-- Logic for using an extra guess, still working on it
+                if((await queryItems(interaction.user.id)) > 0){
+                    numGuesses++;
+                    updateItem(queryItems(interaction.user.id),interaction.user.id,true);
+                }
                 numGuesses--;
                 interaction.followUp(`your guess is ${guess.content}.`);
                 // now handle the guesses

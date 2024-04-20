@@ -49,5 +49,11 @@ function updateADMIN(points, dailyWord, id){
 function setDailyPoints(){
     return Math.floor(Math.random() * 100);
 }
-
+function updateItem(){
+    let sql = 'UPDATE users SET items = ?';
+    let newItems = 0;
+    db.run(sql, [newItems], (err) =>{
+        if (err) return console.error(err.message);
+    });
+}
 updateADMIN(setDailyPoints(),getRandomWordFromDictionary(),ADMIN);
