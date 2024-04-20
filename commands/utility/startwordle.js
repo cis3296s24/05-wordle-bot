@@ -265,13 +265,17 @@ module.exports = {
         .setName('startwordle')
         .setDescription('starts a game of wordle~'),
     async execute(interaction) {
+        if((await queryLastWord(interaction.user.id)) == (await queryLastWord(ADMIN))) {
+            await interaction.reply("You have already guessed today's word. Try again tommorow!");
+            return;
+        }
         const dictionary = fs.readFileSync('dictionary.txt', 'utf-8').split('\n').filter(word => word.length === 5).map(word => word.toLowerCase());
         await interaction.reply(`Hi, ${interaction.user}. Starting a game of Wordle (15 minute time limit).`);
         const randomWord = (await queryLastWord(ADMIN));
         //const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
         // const randomWord = await getRandom5LetterWordFromChatgpt();
         let numGuesses = (await queryGuesses(ADMIN));
-        await interaction.followUp(randomWord);
+        //await interaction.followUp(randomWord);
         //inserting user into db
         insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0,null,0.0);
         const collectorFilter = message => message.content.length == 5 && interaction.user == message.author;
@@ -280,6 +284,7 @@ module.exports = {
         const guessHistory = [];
 
         collector.on('collect', async (guess) => {
+
             const guessContents = guess.content.toLowerCase();
             if (!dictionary.includes(guessContents)) {
                 interaction.followUp('invalid guess, try again: ');

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const sqlite3 = require('sqlite3').verbose();
-
+const ADMIN = 1;
 
 //* Connect to USER DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
@@ -25,6 +25,6 @@ module.exports = {
         .setName('daily')
         .setDescription('See the amount of points available for the day.'),
     async execute(interaction) {
-        await interaction.reply('The amount of points available today is ' + (await queryPoints(1)) + ' points.');
+        await interaction.reply('The amount of points available today is ' + (await queryPoints(ADMIN)) + ' points.');
     },
 };

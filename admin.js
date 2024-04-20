@@ -2,6 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const fs = require('node:fs');
 const { OpenAI } = require('openai');
 const { apiKey } = require('./config.json');
+const ADMIN = 1;
 //* Connect to USER DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error(err.message);
@@ -9,8 +10,26 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
 function getRandomWordFromDictionary(){
     const dictionary = fs.readFileSync('dictionary.txt', 'utf-8').split('\n').filter(word => word.length === 5).map(word => word.toLowerCase());
     const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
-
     return randomWord;
+}
+//* DELETE data
+function deleteUser(id){
+    let sql;
+    sql = 'DELETE FROM users WHERE id = ?'
+    db.run(sql, [id], (err) =>{
+        if (err) return console.error(err.message);
+    });
+}
+//* Query User data
+function queryData(){
+    let sql;
+    sql = 'SELECT * FROM users';
+    db.all(sql, [], (err, rows) => {
+        if (err) return console.error(err.message);
+        rows.forEach((row) => {
+            console.log(row);
+        });
+    })
 }
 //* Insert data into database
 function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals,) {
@@ -31,4 +50,4 @@ function setDailyPoints(){
     return Math.floor(Math.random() * 100);
 }
 
-updateADMIN(setDailyPoints(),getRandomWordFromDictionary(),1);
+updateADMIN(setDailyPoints(),getRandomWordFromDictionary(),ADMIN);
