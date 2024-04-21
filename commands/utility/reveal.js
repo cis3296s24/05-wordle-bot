@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+    const { SlashCommandBuilder } = require('discord.js');
 const sqlite3 = require('sqlite3').verbose();
 let randomWord = require('./startwordle.js');
 
