@@ -95,7 +95,7 @@ async function updatePoints(points, betting, id,win){
     
     else{
         //this is wining and not betting
-        totalNewPoints = (await points) + 2;
+        totalNewPoints = (await points) + (await queryPoints(ADMIN));
 
     }
     let sql2 = 'UPDATE users SET betting = "no" WHERE id = ?';
