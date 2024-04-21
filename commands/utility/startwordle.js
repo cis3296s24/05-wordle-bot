@@ -278,6 +278,8 @@ module.exports = {
         .setName('startwordle')
         .setDescription('starts a game of wordle~'),
     async execute(interaction) {
+         //inserting user into db       
+        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0," ",0.0,0,0,0);
         if((await queryLastWord(interaction.user.id)) == (await queryLastWord(ADMIN))) {
             await interaction.reply("You have already guessed today's word. Try again tommorow!");
             return;
@@ -289,8 +291,6 @@ module.exports = {
         // const randomWord = await getRandom5LetterWordFromChatgpt();
         let numGuesses = (await queryGuesses(ADMIN));
         //await interaction.followUp(randomWord);
-        //inserting user into db
-        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0,null,0.0,0,0,0);
         const collectorFilter = message => message.content.length == 5 && interaction.user == message.author;
         const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 90000 });
         const responseHistory = [];
@@ -347,17 +347,17 @@ module.exports = {
                     interaction.followUp('you win');
                     updateLastWords(randomWord,interaction.user.id);
                     updateWin(queryWin(interaction.user.id),interaction.user.id);
-                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,true);
                     updatePoints(queryPoints(interaction.user.id), interaction.user.id);
+                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     collector.stop();
                 }
                 else if (numGuesses == 0) {
                     interaction.followUp(`you lose. the word was ${randomWord}`);
-                    updateLastWords(randomWord,interaction.user.id);
                     updateLoss(queryLoss(interaction.user.id),interaction.user.id);
-                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
+                    updateLastWords(randomWord,interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,false);
+                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     collector.stop();
                 }
 

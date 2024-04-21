@@ -7,6 +7,10 @@ const ADMIN = 1;
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error(err.message);
 });
+//* Define the table schemas
+db.serialize(() => {
+    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER)');
+});
 function getRandomWordFromDictionary(){
     const dictionary = fs.readFileSync('dictionary.txt', 'utf-8').split('\n').filter(word => word.length === 5).map(word => word.toLowerCase());
     const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
@@ -56,4 +60,5 @@ function updateItem(){
         if (err) return console.error(err.message);
     });
 }
+//insertUser(ADMIN, 'ADMIN',0 , 0,setDailyPoints(), 0, 0 , getRandomWordFromDictionary(), 0 , 6, 0 ,0 );
 updateADMIN(setDailyPoints(),getRandomWordFromDictionary(),ADMIN);
