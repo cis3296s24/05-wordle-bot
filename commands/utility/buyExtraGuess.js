@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const sqlite3 = require('sqlite3').verbose();
+let numGuesses = require('./startwordle.js');
 
 
 //* Connect to USER DB
@@ -61,6 +62,8 @@ module.exports = {
         }else{
             updateGuess(queryGuess(interaction.user.id),interaction.user.id);
             updatePointsAfterGuess(queryPoints(interaction.user.id), interaction.user.id);
+            //* fix this to increment guesses
+            numGuesses++;
             await interaction.reply('Congrats, you now have an extra guess for a game of your choice.');
         }
 

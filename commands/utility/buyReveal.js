@@ -59,7 +59,6 @@ module.exports = {
         .setDescription('Purchase a feature to reveal the first letter in a game.'),
     async execute(interaction) {
 
-
         if((await queryPoints(interaction.user.id)) < 50){
             await interaction.reply('Sorry you do not have enough points to buy a reveal.');
         }else{

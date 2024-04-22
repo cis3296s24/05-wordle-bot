@@ -4,24 +4,16 @@ const { OpenAI } = require('openai');
 const { apiKey } = require('../../config.json');
 const bet = require('./bet');
 const sqlite3 = require('sqlite3').verbose();
-
+const ADMIN = 1;
 //* Connect to USER DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error(err.message);
 });
 
-// //* Connect to DAILY DB
-// const daily_db = new sqlite3.Database('./dailydata.db', sqlite3.OPEN_READWRITE, (err) => {
-//     if (err) return console.error(err.message);
-// });
-
 //* Define the table schemas
 db.serialize(() => {
     db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER, betting VARCHAR)');
 });
-// daily_db.serialize(() => {
-//     db.run('CREATE TABLE IF NOT EXISTS dailyWordle(id INTEGER PRIMARY KEY, word_of_the_day VARCHAR, avail_points INTEGER');
-// });
 ///* working on this func
 function setDailyPoints(){
     return Math.floor(Math.random() * 100);
@@ -29,8 +21,8 @@ function setDailyPoints(){
 
 //* Insert data into database
 
-function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, betting) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals, betting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, betting,) {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals,betting,) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items, reveals, betting], (err) => {
 
         if (err) return console.error(err.message);
@@ -104,7 +96,7 @@ async function updatePoints(points, betting, id,win){
     
     else{
         //this is wining and not betting
-        totalNewPoints = (await points) + 2;
+        totalNewPoints = (await points) + (await queryPoints(ADMIN));
 
     }
     let sql2 = 'UPDATE users SET betting = "no" WHERE id = ?';
@@ -158,6 +150,7 @@ function queryWin(id){
         });
     });
 }
+
 //* query Users Wins
 function queryBetAnsw(id){
     return new Promise((resolve,reject) => {
@@ -174,7 +167,6 @@ function queryBetAnsw(id){
 }
 
 function queryGuesses(id){
-
     return new Promise((resolve,reject) => {
         let sql
         sql = ' SELECT guesses FROM users WHERE id = ?';
@@ -187,7 +179,7 @@ function queryGuesses(id){
         });
     });
 }
-
+// * QUERY users reveals
 function queryReveals(id){
 
     return new Promise((resolve,reject) => {
@@ -205,7 +197,6 @@ function queryReveals(id){
 
 
 function queryItems(id){
-
     return new Promise((resolve,reject) => {
         let sql
         sql = ' SELECT items FROM users WHERE id = ?';
@@ -291,25 +282,38 @@ function queryWinRate(id){
 async function getRandom5LetterWordFromChatgpt() {
 
     const openai = new OpenAI({
-        apiKey: apiKey,
+        apiKey: "Copy the API Key from config.json",
     });
 
     try {
         const chatCompletion = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
-            messages: [{ 'role': 'user', 'content': 'Give me a random word that is exactly 5 letters long.' }],
+            messages: [{ 'role': 'user', 'content': 'Give me a random word that is exactly 5 letters long. Do not repeat the word in the consecutive queries I make.' }],
         });
         console.log(chatCompletion.choices[0].message);
 
         // Extract the word from the response
         const randomWord = chatCompletion.choices[0].message.content;
-        // console.log("Generated word:", randomWord);
-        return randomWord.trim().toUpperCase();
+        console.log("Generated word:", randomWord);
+        return randomWord.toLowerCase();
     }
     catch (error) {
         console.error('Error generating word:', error);
     }
 
+}
+async function updateItem(items, id, used){
+    let sql = 'UPDATE users SET items = ? WHERE id = ?';
+    let newItems = await items;
+    if(used){
+        newItems = newItems -1;
+    }
+    else{
+        newItems = newItems + 1;
+    }
+    db.run(sql, [newItems, id], (err) =>{
+        if (err) return console.error(err.message);
+    });
 }
 
 module.exports = {
@@ -317,14 +321,24 @@ module.exports = {
         .setName('startwordle')
         .setDescription('starts a game of wordle~'),
     async execute(interaction) {
+         //inserting user into db       
+        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0," ",0.0,0,0,0);
+        if((await queryLastWord(interaction.user.id)) == (await queryLastWord(ADMIN))) {
+            await interaction.reply("You have already guessed today's word. Try again tommorow!");
+            return;
+        }
         const dictionary = fs.readFileSync('dictionary.txt', 'utf-8').split('\n').filter(word => word.length === 5).map(word => word.toLowerCase());
         await interaction.reply(`Hi, ${interaction.user}. Starting a game of Wordle (15 minute time limit).`);
-        const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+
+        const randomWord = (await queryLastWord(ADMIN));
+        //const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+
+        //const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+        //uncomment the line below to use chatGPT & comment the above line
+
         // const randomWord = await getRandom5LetterWordFromChatgpt();
-        let numGuesses = 6;
-        await interaction.followUp(randomWord);
-        //inserting user into db
-        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0,null,0.0);
+        let numGuesses = (await queryGuesses(ADMIN));
+        //await interaction.followUp(randomWord);
         const collectorFilter = message => message.content.length == 5 && interaction.user == message.author;
         const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 90000 });
         const responseHistory = [];
@@ -339,6 +353,11 @@ module.exports = {
                 interaction.followUp('repeat guess, try again: ');
             }
             else {
+                //* v-- Logic for using an extra guess, still working on it
+                if((await queryItems(interaction.user.id)) > 0){
+                    numGuesses++;
+                    updateItem(queryItems(interaction.user.id),interaction.user.id,true);
+                }
                 numGuesses--;
                 interaction.followUp(`your guess is ${guess.content}.`);
                 // now handle the guesses
@@ -376,17 +395,17 @@ module.exports = {
                     interaction.followUp('you win');
                     updateLastWords(randomWord,interaction.user.id);
                     updateWin(queryWin(interaction.user.id),interaction.user.id);
-                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,true);
+                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     updatePoints(queryPoints(interaction.user.id),queryBetAnsw(interaction.user.id), interaction.user.id,true);
                     collector.stop();
                 }
                 else if (numGuesses == 0) {
                     interaction.followUp(`you lose. the word was ${randomWord}`);
-                    updateLastWords(randomWord,interaction.user.id);
                     updateLoss(queryLoss(interaction.user.id),interaction.user.id);
-                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
+                    updateLastWords(randomWord,interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,false);
+                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
                     updatePoints(queryPoints(interaction.user.id),queryBetAnsw(interaction.user.id), interaction.user.id,false);
 
                     collector.stop();

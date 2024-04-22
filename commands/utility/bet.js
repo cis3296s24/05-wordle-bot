@@ -40,7 +40,7 @@ module.exports = {
 
         collector.on('collect', async (betValue) => {
             betAns = (betValue.content);
-            interaction.followUp(`your bet is ${betAns}.`);
+            interaction.followUp(`Your answer was ${betAns}.You are now betting all your points.`);
             console.log(betAns);
             updateBetting(betAns, interaction.user.id);
             collector.stop();
