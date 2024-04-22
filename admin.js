@@ -71,5 +71,5 @@ function updateItem(){
     });
 }
 
-//insertUser(ADMIN, 'ADMIN',0 , 0,setDailyPoints(), 0, 0 , getRandomWordFromDictionary(), 0 , 6, 0 ,0 , 0, 0);
-updateADMIN(setDailyPoints(),getRandomWordFromDictionary(),ADMIN);
+insertUser(ADMIN, 'ADMIN',0 , 0,setDailyPoints(), 0, 0 , getRandomWordFromDictionary(), 0 , 6, 0 ,0 , 0, 0);
+//updateADMIN(setDailyPoints(),getRandomWordFromDictionary(),ADMIN);
