@@ -61,6 +61,13 @@ function updateItem(){
         if (err) return console.error(err.message);
     });
 }
+/** insertUser function is for intial use of the bot,
+ *  to make sure the ADMIN is the first user in the database
+ *  uncomment it, run admin.js
+ *  Once ADMIN is in the DB, comment it out and use
+ *  updateADMIN to adjust its fields
+ * */
+
 //insertUser(ADMIN, 'ADMIN',0 , 0,setDailyPoints(), 0, 0 , getRandomWordFromDictionary(), 0 , 6, 0 ,0,0);
 updateADMIN(setDailyPoints(),getRandomWordFromDictionary(),ADMIN);
 queryData();
