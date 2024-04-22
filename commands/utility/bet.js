@@ -42,7 +42,7 @@ module.exports = {
             betAns = (betValue.content);
             interaction.followUp(`your bet is ${betAns}.`);
             console.log(betAns);
-            updateBetting(betAns, interaction.user.id);
+            updateBetting((await betAns), interaction.user.id);
             collector.stop();
         });
 

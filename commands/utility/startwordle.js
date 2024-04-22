@@ -334,7 +334,7 @@ module.exports = {
         let numGuesses = (await queryGuesses(ADMIN));
         //await interaction.followUp(randomWord);
         const collectorFilter = message => message.content.length == 5 && interaction.user == message.author;
-        const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 90000 });
+        const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 200000 });
         const responseHistory = [];
         const guessHistory = [];
 
