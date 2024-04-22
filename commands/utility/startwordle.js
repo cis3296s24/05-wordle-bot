@@ -374,7 +374,7 @@ module.exports = {
         .setDescription('starts a game of wordle~'),
     async execute(interaction) {
          //inserting user into db       
-        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0," ",0.0,0,0,0,0,0,0);
+        insertUser(interaction.user.id,interaction.user.username,0,0,200,0,0," ",0.0,0,0,0,0,0,0);
         if((await queryLastWord(interaction.user.id)) == (await queryLastWord(ADMIN))) {
             await interaction.reply("You have already guessed today's word. Try again tommorow!");
             return;
