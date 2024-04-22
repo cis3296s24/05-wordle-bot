@@ -281,20 +281,20 @@ function queryWinRate(id){
 async function getRandom5LetterWordFromChatgpt() {
 
     const openai = new OpenAI({
-        apiKey: apiKey,
+        apiKey: "Copy the API Key from config.json",
     });
 
     try {
         const chatCompletion = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
-            messages: [{ 'role': 'user', 'content': 'Give me a random word that is exactly 5 letters long.' }],
+            messages: [{ 'role': 'user', 'content': 'Give me a random word that is exactly 5 letters long. Do not repeat the word in the consecutive queries I make.' }],
         });
         console.log(chatCompletion.choices[0].message);
 
         // Extract the word from the response
         const randomWord = chatCompletion.choices[0].message.content;
-        // console.log("Generated word:", randomWord);
-        return randomWord.trim().toUpperCase();
+        console.log("Generated word:", randomWord);
+        return randomWord.toLowerCase();
     }
     catch (error) {
         console.error('Error generating word:', error);
@@ -328,8 +328,13 @@ module.exports = {
         }
         const dictionary = fs.readFileSync('dictionary.txt', 'utf-8').split('\n').filter(word => word.length === 5).map(word => word.toLowerCase());
         await interaction.reply(`Hi, ${interaction.user}. Starting a game of Wordle (15 minute time limit).`);
+
         const randomWord = (await queryLastWord(ADMIN));
         //const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+
+        //const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+        //uncomment the line below to use chatGPT & comment the above line
+
         // const randomWord = await getRandom5LetterWordFromChatgpt();
         let numGuesses = (await queryGuesses(ADMIN));
         //await interaction.followUp(randomWord);
