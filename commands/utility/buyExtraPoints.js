@@ -24,52 +24,50 @@ function queryPoints(id){
 }
 
 //* UPDATE points
-async function updatePointsAfterGuess(points, id){
+async function updatePointsAfterExtraPoints(points, id){
     let sql = 'UPDATE users SET points = ? WHERE id = ?';
-    let newTotal = (await points) - 100;
+    let newTotal = (await points) - 75;
     db.run(sql, [newTotal, id], (err) =>{
         if (err) return console.error(err.message);
     });
 }
 
-//* UPDATE guess
-async function updateGuess(guesses, id){
-    let sql = 'UPDATE users SET guesses = ? WHERE id = ?';
-    let newGuesses = (await guesses) + 1;
-    db.run(sql, [newGuesses, id], (err) =>{
+//* UPDATE extraPoints
+async function updateExtraPoints(extraPoints, id){
+    let sql = 'UPDATE users SET extraPoints = ? WHERE id = ?';
+    let newDoublePoints = (await extraPoints) + 1;
+    db.run(sql, [newDoublePoints, id], (err) =>{
         if (err) return console.error(err.message);
     });
 }
 
-//* query guesses
-function queryGuess(id){
+//* query extraPoints
+function queryExtraPoints(id){
     return new Promise((resolve,reject) => {
         let sql
-        sql = ' SELECT guesses FROM users WHERE id = ?';
+        sql = ' SELECT extraPoints FROM users WHERE id = ?';
         db.all(sql, [id], (err,rows)   => {
             if (err) {
                 console.error(err.message);
                 reject(err);
             }
-                resolve(rows[0].guesses);
+                resolve(rows[0].reveals);
         });
     });
 }
 
-// implement /buy_extra_guess
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('buy_extra_guess')
-        .setDescription('Purchase an extra guess for game.'), 
+        .setName('buy_extra_points')
+        .setDescription('Purchase 100 extra points for a game.'), 
     async execute(interaction) {
-        if((await queryPoints(interaction.user.id)) < 100){
-            await interaction.reply('Sorry you do not have enough points to buy a guess');
+        if((await queryPoints(interaction.user.id)) < 75){
+            await interaction.reply('Sorry you do not have enough points to buy double points.');
         }else{
-            updateGuess(queryGuess(interaction.user.id),interaction.user.id);
-            updatePointsAfterGuess(queryPoints(interaction.user.id), interaction.user.id);
-            //* fix this to increment guesses
-            numGuesses++;
-            await interaction.reply('Congrats, you now have an extra guess for a game of your choice.');
+            // they have purchases extra 100 points
+            updateExtraPoints(queryExtraPoints(interaction.user.id),interaction.user.id);
+            updatePointsAfterExtraPoints(queryPoints(interaction.user.id), interaction.user.id);
+            await interaction.reply('Congrats, you now have double points for a game of your choice.');
         }
 
     },

@@ -12,17 +12,18 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
 
 //* Define the table schemas
 db.serialize(() => {
-    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER, betting VARCHAR)');
+    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER, extraPoints INTEGER, checkExtraPoints INTEGER, betting VARCHAR)');
 });
+
 ///* working on this func
 function setDailyPoints(){
     return Math.floor(Math.random() * 100);
 }
 
 //* Insert data into database
-function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, betting,) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals,betting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items, reveals, betting], (err) => {
+function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, extraPoints, checkExtraPoints, betting,) {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals, extraPoints, checkExtraPoints, betting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    db.run(sql, [id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, extraPoints, checkExtraPoints, betting], (err) => {
 
         if (err) return console.error(err.message);
     });
@@ -49,6 +50,7 @@ async function updateWin(win, id){
         if (err) return console.error(err.message);
     });
 }
+
 //* UPDATE LOSSES
 async function updateLoss(losses, id){
     let sql = 'UPDATE users SET losses = ? WHERE id = ?';
@@ -58,6 +60,7 @@ async function updateLoss(losses, id){
         if (err) return console.error(err.message);
     });
 }
+
 // * update user's streak
 async function updateStreak(streak, id, outcome){
     let sql = 'UPDATE users SET win_streak = ? WHERE id = ?';
@@ -72,11 +75,38 @@ async function updateStreak(streak, id, outcome){
         if (err) return console.error(err.message);
     });
 }
+
+//* query checkExtraPoints
+function queryCheckExtraPoints(id){
+    return new Promise((resolve,reject) => {
+        let sql
+        sql = ' SELECT checkExtraPoints FROM users WHERE id = ?';
+        db.all(sql, [id], (err,rows)   => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            }
+                resolve(rows[0].reveals);
+        });
+    });
+}
+
+//* UPDATE extraPoints
+async function updateAfterUsingExtraPoints(checkExtraPoints, id){
+    let sql = 'UPDATE users SET checkExtraPoints = ? WHERE id = ?';
+    let newCheckExtraPoints = await checkExtraPoints;
+    newCheckExtraPoints = newCheckExtraPoints - 1;
+    db.run(sql, [newReveal, id], (err) =>{
+        if (err) return console.error(err.message);
+    });
+}
+
 //* UPDATE points
-async function updatePoints(points, betting, id,win){
+async function updatePoints(points, betting, id, win, checkExtraPoints){
     let totalNewPoints;
-    totalNewPoints= (await points);
+    totalNewPoints = (await points);
     let bettingAnsw=await(betting);
+    let addExtra = (await checkExtraPoints);
     console.log(bettingAnsw,win);
 
     if(win==false && bettingAnsw=="no"){
@@ -94,9 +124,15 @@ async function updatePoints(points, betting, id,win){
     }
     
     else{
-        //this is wining and not betting
-        totalNewPoints = (await points) + (await queryPoints(ADMIN));
-
+        //this is wining and not betting with using the extra 100 feature
+        if(addExtra == 1) { 
+            totalNewPoints = (await points) + (await queryPoints(ADMIN)) + 100;
+            updateAfterCheckExtraPoints(queryCheckExtraPoints(interaction.user.id),interaction.user.id);
+        }
+        // this is winning and not betting 
+        else{
+            totalNewPoints = (await points) + (await queryPoints(ADMIN));
+        }
     }
     let sql2 = 'UPDATE users SET betting = "no" WHERE id = ?';
     db.run(sql2, [id], (err) =>{
@@ -106,6 +142,7 @@ async function updatePoints(points, betting, id,win){
         if (err) return console.error(err.message);
     });
 }
+
 //* UPDATE last word
 async function updateLastWords(lastWord, id){
     let sql = 'UPDATE users SET last_word = ? WHERE id = ?';
@@ -124,6 +161,7 @@ function deleteUser(id){
         if (err) return console.error(err.message);
     });
 }
+
 //* Query User data
 function queryData(){
     let sql;
@@ -135,6 +173,7 @@ function queryData(){
         });
     })
 }
+
 //* query Users Wins
 function queryWin(id){
     return new Promise((resolve,reject) => {
@@ -165,6 +204,7 @@ function queryBetAnsw(id){
     });
 }
 
+//* query Users guesses
 function queryGuesses(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -178,6 +218,7 @@ function queryGuesses(id){
         });
     });
 }
+
 // * QUERY users reveals
 function queryReveals(id){
 
@@ -194,7 +235,7 @@ function queryReveals(id){
     });
 }
 
-
+//* query Users items
 function queryItems(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -208,6 +249,8 @@ function queryItems(id){
         });
     });
 }
+
+//* query Users points
 function queryPoints(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -221,6 +264,8 @@ function queryPoints(id){
         });
     });
 }
+
+//* query Users Win Streak
 function queryWinStreak(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -234,6 +279,8 @@ function queryWinStreak(id){
         });
     });
 }
+
+//* query Users Last Word
 function queryLastWord(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -247,6 +294,7 @@ function queryLastWord(id){
         });
     });
 }
+
 //* query Users Losses
 function queryLoss(id){
     return new Promise((resolve,reject) => {
@@ -262,6 +310,7 @@ function queryLoss(id){
     });
     
 }
+
 //* query Users Win rate
 function queryWinRate(id){
     return new Promise((resolve,reject) => {
@@ -278,6 +327,7 @@ function queryWinRate(id){
     
 }
 
+//* use ChatGPT to get a 5 letter word
 async function getRandom5LetterWordFromChatgpt() {
 
     const openai = new OpenAI({
@@ -301,6 +351,8 @@ async function getRandom5LetterWordFromChatgpt() {
     }
 
 }
+
+//* update item
 async function updateItem(items, id, used){
     let sql = 'UPDATE users SET items = ? WHERE id = ?';
     let newItems = await items;
@@ -315,13 +367,14 @@ async function updateItem(items, id, used){
     });
 }
 
+// implement /startwordle
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('startwordle')
         .setDescription('starts a game of wordle~'),
     async execute(interaction) {
          //inserting user into db       
-        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0," ",0.0,0,0,0);
+        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0," ",0.0,0,0,0,0);
         if((await queryLastWord(interaction.user.id)) == (await queryLastWord(ADMIN))) {
             await interaction.reply("You have already guessed today's word. Try again tommorow!");
             return;
@@ -412,6 +465,7 @@ module.exports = {
 
             }
         });
+
         // handle "time-out" situations -- if no time left, then they automatically lose
         collector.on('end', collected => {
             // store information about whether the person won or not, points awarded, etc.
