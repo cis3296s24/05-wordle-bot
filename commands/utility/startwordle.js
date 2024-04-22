@@ -301,6 +301,7 @@ async function getRandom5LetterWordFromChatgpt() {
     }
 
 }
+
 async function updateItem(items, id, used){
     let sql = 'UPDATE users SET items = ? WHERE id = ?';
     let newItems = await items;
