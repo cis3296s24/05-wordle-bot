@@ -19,6 +19,27 @@ function queryGuess(id){
         });
     });
 }
+function queryItems(id){
+    return new Promise((resolve,reject) => {
+        let sql
+        sql = ' SELECT items FROM users WHERE id = ?';
+        db.all(sql, [id], (err,rows)   => {
+            if (err) {
+                console.error(err.message);
+                reject(err);
+            }
+                resolve(rows[0].items);
+        });
+    });
+}
+async function updateItem(items, id){
+    let sql = 'UPDATE users SET items = ? WHERE id = ?';
+    let newItems = await items;
+    newItems = newItems + 1;
+    db.run(sql, [newItems, id], (err) =>{
+        if (err) return console.error(err.message);
+    });
+}
 //* UPDATE guess
 async function updateAfterGuess(guesses, id){
     let sql = 'UPDATE users SET guesses = ? WHERE id = ?';
@@ -34,6 +55,7 @@ module.exports = {
     async execute(interaction) {
         if((await queryGuess(interaction.user.id)) > 0){
             updateAfterGuess(queryGuess(interaction.user.id),interaction.user.id);
+            updateItem(queryItems(interaction.user.id),interaction.user.id);
             await interaction.reply('Using an extra guess for your next game.');
         }
         else{
