@@ -12,7 +12,7 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
 
 //* Define the table schemas
 db.serialize(() => {
-    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER, extraPoints INTEGER, checkExtraPoints INTEGER, betting VARCHAR)');
+    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER, extraPoints INTEGER, checkExtraPoints INTEGER, betting INTEGER)');
 });
 
 ///* working on this func
@@ -22,7 +22,7 @@ function setDailyPoints(){
 
 //* Insert data into database
 function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, extraPoints, checkExtraPoints, betting,) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals, extraPoints, checkExtraPoints, betting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals, extraPoints, checkExtraPoints, betting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     db.run(sql, [id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, extraPoints, checkExtraPoints, betting], (err) => {
 
         if (err) return console.error(err.message);
@@ -374,7 +374,7 @@ module.exports = {
         .setDescription('starts a game of wordle~'),
     async execute(interaction) {
          //inserting user into db       
-        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0," ",0.0,0,0,0,0);
+        insertUser(interaction.user.id,interaction.user.username,0,0,0,0,0," ",0.0,0,0,0,0,0,0);
         if((await queryLastWord(interaction.user.id)) == (await queryLastWord(ADMIN))) {
             await interaction.reply("You have already guessed today's word. Try again tommorow!");
             return;

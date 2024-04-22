@@ -11,10 +11,9 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
 
 //* Define the table schemas
 db.serialize(() => {
-    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER)');
+    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER, extraPoints INTEGER, checkExtraPoints INTEGER, betting INTEGER)');
 });
 
-// get a random word from dictionary.txt file
 function getRandomWordFromDictionary(){
     const dictionary = fs.readFileSync('dictionary.txt', 'utf-8').split('\n').filter(word => word.length === 5).map(word => word.toLowerCase());
     const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
@@ -43,9 +42,10 @@ function queryData(){
 }
 
 //* Insert data into database
-function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, extraPoints, checkExtraPoints,) {
-    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals, extraPoints, checkExtraPoints,) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items, reveals, extraPoints, checkExtraPoints], (err) => {
+function insertUser(id, username, wins, losses, points, score, streak, lastWord, winRate, guesses, items, reveals, extraPoints, checkExtraPoints, betting,) {
+    let sql = 'INSERT INTO users(id, username, wins, losses, points, leader_score, win_streak, last_word, win_rate, guesses, items, reveals, extraPoints, checkExtraPoints, betting) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    db.run(sql, [id, username, wins, losses, points, score, streak,lastWord,winRate,guesses,items, reveals, extraPoints, checkExtraPoints, betting], (err) => {
+
         if (err) return console.error(err.message);
     });
 }
@@ -71,5 +71,5 @@ function updateItem(){
     });
 }
 
-//insertUser(ADMIN, 'ADMIN',0 , 0,setDailyPoints(), 0, 0 , getRandomWordFromDictionary(), 0 , 6, 0 ,0 , 0, 0);
+insertUser(ADMIN, 'ADMIN',0 , 0,setDailyPoints(), 0, 0 , getRandomWordFromDictionary(), 0 , 6, 0 ,0, 0, 0, 0);
 updateADMIN(setDailyPoints(),getRandomWordFromDictionary(),ADMIN);
