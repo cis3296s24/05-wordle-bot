@@ -5,7 +5,9 @@ const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error(err.message);
 });
+
 let wageredAmount;
+// query User's points
 function queryPoints(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -20,6 +22,7 @@ function queryPoints(id){
     });
 }
 
+// update the betting amount in DB
 async function updateBetting(betting, id){
     let sql = 'UPDATE users SET betting = ? WHERE id = ?';
     db.run(sql, [betting, id], (err) =>{
@@ -27,6 +30,7 @@ async function updateBetting(betting, id){
     });
 }
 
+// implement /bet 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('bet')
