@@ -3,20 +3,22 @@ const sqlite3 = require('sqlite3').verbose();
 
 //* Connect to USER DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
-    if (err) return console.error(err.message);
+    if (err) {
+        console.error(err.message);
+    }
 });
 
 //* query extraPoints
 function queryExtraPoints(id){
     return new Promise((resolve,reject) => {
-        let sql
-        sql = ' SELECT extraPoints FROM users WHERE id = ?';
-        db.all(sql, [id], (err,rows)   => {
+        let sql = 'SELECT extraPoints FROM users WHERE id = ?';
+        db.get(sql, [id], (err,row)   => {
             if (err) {
                 console.error(err.message);
                 reject(err);
+            } else {
+                resolve(row ? row.extraPoints : 0);
             }
-                resolve(rows[0].extraPoints);
         });
     });
 }
@@ -24,24 +26,25 @@ function queryExtraPoints(id){
 //* UPDATE extraPoints
 async function updateAfterExtraPoints(extraPoints, id){
     let sql = 'UPDATE users SET extraPoints = ? WHERE id = ?';
-    let newExtraPoints = (await extraPoints);
-    newExtraPoints = newExtraPoints - 1;
+    let newExtraPoints = await extraPoints - 1;
     db.run(sql, [newExtraPoints, id], (err) =>{
-        if (err) return console.error(err.message);
+        if (err) {
+            console.error(err.message);
+        }
     });
 }
 
 //* query checkExtraPoints
 function queryCheckExtraPoints(id){
     return new Promise((resolve,reject) => {
-        let sql
-        sql = ' SELECT checkExtraPoints FROM users WHERE id = ?';
-        db.all(sql, [id], (err,rows)   => {
+        let sql = 'SELECT checkExtraPoints FROM users WHERE id = ?';
+        db.get(sql, [id], (err,row)   => {
             if (err) {
                 console.error(err.message);
                 reject(err);
+            } else {
+                resolve(row ? row.checkExtraPoints : 0);
             }
-                resolve(rows[0].checkExtraPoints);
         });
     });
 }
@@ -49,10 +52,11 @@ function queryCheckExtraPoints(id){
 //* UPDATE checkExtraPoints
 async function updateAfterCheckExtraPoints(checkExtraPoints, id){
     let sql = 'UPDATE users SET checkExtraPoints = ? WHERE id = ?';
-    let newCheckExtraPoints = (await checkExtraPoints);
-    newCheckExtraPoints = newCheckExtraPoints + 1;
+    let newCheckExtraPoints = await checkExtraPoints + 1;
     db.run(sql, [newCheckExtraPoints, id], (err) =>{
-        if (err) return console.error(err.message);
+        if (err) {
+            console.error(err.message);
+        }
     });
 }
 
@@ -62,12 +66,19 @@ module.exports = {
         .setName('extra_points')
         .setDescription('Get 100 extra points in your next  game.'),
     async execute(interaction) {
-        if((await queryExtraPoints(interaction.user.id)) > 0){
-            updateAfterExtraPoints(queryExtraPoints(interaction.user.id),interaction.user.id);
-            updateAfterCheckExtraPoints(queryCheckExtraPoints(interaction.user.id),interaction.user.id);
-        }
-        else{
-            await interaction.reply('You do not have the extra 100 points feature.');
+        try {
+            const extraPoints = await queryExtraPoints(interaction.user.id);
+            if(extraPoints > 0){
+                await updateAfterExtraPoints(extraPoints, interaction.user.id);
+                const checkExtraPoints = await queryCheckExtraPoints(interaction.user.id);
+                await updateAfterCheckExtraPoints(checkExtraPoints, interaction.user.id);
+                await interaction.reply('You have redeemed 100 extra points for your next game.');
+            } else {
+                await interaction.reply('You do not have the extra 100 points feature.');
+            }
+        } catch (error) {
+            console.error(error.message);
+            await interaction.reply('An error occurred while processing your request.');
         }
     },
 };
