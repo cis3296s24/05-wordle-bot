@@ -5,49 +5,57 @@ Wordle, the popular web-based word puzzle game, captivates players worldwide by 
 ![wordle.png](wordle.png)
 
 
-## How to Run
+## How to Run 
 
-To run the Wordle Discord Bot, follow these steps:
+To install and run the Wordle Discord Bot for your personal server, follow these steps:
 
-- Download the latest binary from the Release section on GitHub.
-- On the command line, decompress the file using the following command:
-    
+- Copy/paste the link below into your web browser:
     ```
-    tar -xzf wordle_bot.tar.gz
-    
+    https://discord.com/oauth2/authorize?client_id=1225441143383396372&permissions=9141837900800&scope=bot+applications.commands
     ```
-    
-- Navigate to the directory where the Wordle Bot files are located.
-- To install all needed dependencies, run:
-    
-    ```
-    npm install
-    ```
-- To run the wordle game (terminal-only in this release)
+You should see a menu on Discord with the icon of the bot next to yours. Choose the server you want to add the bot to and click "Authorize". 
+(note: You need to have the "Manage Server" permission to be able to successfully select a server)
 
-    ```
-    node wordle.js
-    ```
-
-- To run the discord bot, featuring two commands:
-
-    ```
-    node index.js
-    ```
-    
-- The bot will be up and running on your Discord server.
+- You're all finished (the bot is up and running)! Enjoy using the Wordle bot, type /help for more info on commands.
 
 ## How to Contribute
 
 To contribute to the development of the Wordle Discord Bot, follow the instructions on our project board available [here](https://temple-team-fykau2e3.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog).
+See the **"How to Build"** section for how to install a local copy of the bot.
 
 ## How to Build
 
 To build the Wordle Discord Bot from source, follow these steps:
 
-- Clone this GitHub repository: [Wordle Discord Bot](https://github.com/cis3296s24/05-wordle-bot).
-- Choose the appropriate branch for your desired stability level or development stage.
-- Use IntelliJ 11 for development.
-- Ensure all necessary libraries are downloaded and configured.
-- Compile and run the main file to start the application.
-- Once done, the bot will initialize and be ready to use on your Discord server.
+
+- Download the latest version of [Node.js](https://nodejs.org/en). Node.js includes the package manager npm, which we'll use later to help with installing our needed dependencies (things our program needs to run).
+- Click the green box labeled 'Code', then copy the link under 'HTTPS' by clicking the clipboard icon. 
+- Open your preferred Javascript IDE of choice ([VSCode](https://code.visualstudio.com/) is our recommendation). Type in terminal:
+    ```
+    git clone {your url}
+    ```
+    to clone the current release to your local repository.
+
+- To install all needed dependencies, run:
+    
+    ```
+    npm install
+    ```
+- To initialize and configure a local copy of the database, run:
+
+    ```
+    node admin.js
+    ```
+
+- To test the bot, invite it to a personal Discord server of your choosing. Follow the instructions in **"How to Run"** for more information.
+- After inviting the bot, start it via the command:
+
+    ```
+    node index.js
+    ```
+- To stop the bot, interrupt the running process by typing Ctrl+C in your terminal.  
+- Commands for the bot are found in the commands/utility folder. To edit a command, first stop your bot (see above for command). After adding/editing a command, update your bot by running:
+
+    ```
+    node deploy-commands.js
+    ```
