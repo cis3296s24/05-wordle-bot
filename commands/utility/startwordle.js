@@ -127,7 +127,7 @@ async function updatePoints(points, betting, id, win, checkExtraPoints){
         //this is wining and not betting with using the extra 100 feature
         if(addExtra == 1) { 
             totalNewPoints = (await points) + (await queryPoints(ADMIN)) + 100;
-            updateAfterCheckExtraPoints(queryCheckExtraPoints(interaction.user.id),interaction.user.id);
+            updateAfterUsingExtraPoints(queryCheckExtraPoints(interaction.user.id),interaction.user.id);
         }
         // this is winning and not betting 
         else{
