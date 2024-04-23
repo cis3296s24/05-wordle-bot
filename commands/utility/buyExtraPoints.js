@@ -1,7 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
 const sqlite3 = require('sqlite3').verbose();
-let numGuesses = require('./startwordle.js');
-
 
 //* Connect to USER DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
@@ -32,15 +30,6 @@ async function updatePointsAfterExtraPoints(points, id){
     });
 }
 
-//* UPDATE extraPoints
-async function updateExtraPoints(extraPoints, id){
-    let sql = 'UPDATE users SET extraPoints = ? WHERE id = ?';
-    let newDoublePoints = (await extraPoints) + 1;
-    db.run(sql, [newDoublePoints, id], (err) =>{
-        if (err) return console.error(err.message);
-    });
-}
-
 //* query extraPoints
 function queryExtraPoints(id){
     return new Promise((resolve,reject) => {
@@ -51,8 +40,17 @@ function queryExtraPoints(id){
                 console.error(err.message);
                 reject(err);
             }
-                resolve(rows[0].reveals);
+                resolve(rows[0].extraPoints);
         });
+    });
+}
+
+//* UPDATE extraPoints
+async function updateExtraPoints(extraPoints, id){
+    let sql = 'UPDATE users SET extraPoints = ? WHERE id = ?';
+    let newExtraPoints = (await extraPoints) + 1;
+    db.run(sql, [newExtraPoints, id], (err) =>{
+        if (err) return console.error(err.message);
     });
 }
 
@@ -65,8 +63,8 @@ module.exports = {
             await interaction.reply('Sorry you do not have enough points to buy double points.');
         }else{
             // they have purchases extra 100 points
-            updateExtraPoints(queryExtraPoints(interaction.user.id),interaction.user.id);
-            updatePointsAfterExtraPoints(queryPoints(interaction.user.id), interaction.user.id);
+            await updateExtraPoints(queryExtraPoints(interaction.user.id),interaction.user.id);
+            await updatePointsAfterExtraPoints(queryPoints(interaction.user.id), interaction.user.id);
             await interaction.reply('Congrats, you now have double points for a game of your choice.');
         }
 

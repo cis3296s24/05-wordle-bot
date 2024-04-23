@@ -1,6 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
 const sqlite3 = require('sqlite3').verbose();
-let randomWord = require('./startwordle.js');
 
 //* Connect to USER DB
 const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) => {
@@ -17,7 +16,7 @@ function queryExtraPoints(id){
                 console.error(err.message);
                 reject(err);
             }
-                resolve(rows[0].reveals);
+                resolve(rows[0].extraPoints);
         });
     });
 }
@@ -27,7 +26,7 @@ async function updateAfterExtraPoints(extraPoints, id){
     let sql = 'UPDATE users SET extraPoints = ? WHERE id = ?';
     let newExtraPoints = (await extraPoints);
     newExtraPoints = newExtraPoints - 1;
-    db.run(sql, [newReveal, id], (err) =>{
+    db.run(sql, [newExtraPoints, id], (err) =>{
         if (err) return console.error(err.message);
     });
 }
@@ -42,7 +41,7 @@ function queryCheckExtraPoints(id){
                 console.error(err.message);
                 reject(err);
             }
-                resolve(rows[0].reveals);
+                resolve(rows[0].checkExtraPoints);
         });
     });
 }
@@ -52,7 +51,7 @@ async function updateAfterCheckExtraPoints(checkExtraPoints, id){
     let sql = 'UPDATE users SET checkExtraPoints = ? WHERE id = ?';
     let newCheckExtraPoints = (await checkExtraPoints);
     newCheckExtraPoints = newCheckExtraPoints + 1;
-    db.run(sql, [newReveal, id], (err) =>{
+    db.run(sql, [newCheckExtraPoints, id], (err) =>{
         if (err) return console.error(err.message);
     });
 }
@@ -68,7 +67,7 @@ module.exports = {
             updateAfterCheckExtraPoints(queryCheckExtraPoints(interaction.user.id),interaction.user.id);
         }
         else{
-            await interaction.reply('You do not have the double points feature.');
+            await interaction.reply('You do not have the extra 100 points feature.');
         }
     },
 };
