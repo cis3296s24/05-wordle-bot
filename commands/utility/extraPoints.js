@@ -17,7 +17,7 @@ function queryExtraPoints(id){
                 console.error(err.message);
                 reject(err);
             } else {
-                resolve(row ? row.extraPoints : 0);
+                resolve(rows[0].extraPoints);
             }
         });
     });
@@ -43,7 +43,7 @@ function queryCheckExtraPoints(id){
                 console.error(err.message);
                 reject(err);
             } else {
-                resolve(row ? row.checkExtraPoints : 0);
+                resolve(rows[0].checkExtraPoints);
             }
         });
     });
