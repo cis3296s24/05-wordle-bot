@@ -367,7 +367,15 @@ async function updateItem(items, id, used){
     });
 }
 
-// implement /startwordle
+
+function getAbsenceEmoji(theme) {
+    const absenceEmoji = {
+        dark: ':white_large_square:',
+        light: ':black_large_square:'
+    };
+    return absenceEmoji[theme] || absenceEmoji['dark']; // Default to dark if not specified
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('startwordle')
@@ -381,6 +389,9 @@ module.exports = {
         }
         const dictionary = fs.readFileSync('dictionary.txt', 'utf-8').split('\n').filter(word => word.length === 5).map(word => word.toLowerCase());
         await interaction.reply(`Hi, ${interaction.user}. Starting a game of Wordle (15 minute time limit).`);
+        
+        const theme = await queryTheme(interaction.user.id); 
+        const absenceEmoji = getAbsenceEmoji(theme);
 
         const randomWord = (await queryLastWord(ADMIN));
         //const randomWord = dictionary[Math.floor(Math.random() * dictionary.length)];
@@ -423,7 +434,7 @@ module.exports = {
                     }
                     // need to handle edge case for dupes (use count of letters)
                     else {
-                        squareArray.push(':black_large_square:');
+                        squareArray.push(absenceEmoji);
                     }
                 }
                 let letter_square_combo = '';
