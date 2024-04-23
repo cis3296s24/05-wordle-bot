@@ -29,16 +29,17 @@ function insertUser(id, username, wins, losses, points, score, streak, lastWord,
 }
 
 //* Updates the users win rate
-async function updateWinRate(wins, losses, id){
+async function updateWinRate(id){
     let sql = 'UPDATE users SET win_rate = ? WHERE id = ?';
-    let aWin = await wins;
-    let aLoss = await losses;
+    let aWin = await queryWin(id);
+    let aLoss = await queryLoss(id);
     let newWinRate = Math.floor((aWin/(aWin+aLoss)) * 100);
 
     db.run(sql, [newWinRate, id], (err) =>{
         if (err) return console.error(err.message);
     });
 }
+
 
 //* UPDATE WINS
 async function updateWin(win, id){
@@ -340,7 +341,7 @@ module.exports = {
         let numGuesses = (await queryGuesses(ADMIN));
         //await interaction.followUp(randomWord);
         const collectorFilter = message => message.content.length == 5 && interaction.user == message.author;
-        const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 200000 });
+        const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 90000 });
         const responseHistory = [];
         const guessHistory = [];
 
@@ -396,7 +397,7 @@ module.exports = {
                     updateLastWords(randomWord,interaction.user.id);
                     updateWin(queryWin(interaction.user.id),interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,true);
-                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
+                    updateWinRate(interaction.user.id);
                     updatePoints(queryPoints(interaction.user.id),queryBetAnsw(interaction.user.id), interaction.user.id,true);
                     collector.stop();
                 }
@@ -405,9 +406,8 @@ module.exports = {
                     updateLoss(queryLoss(interaction.user.id),interaction.user.id);
                     updateLastWords(randomWord,interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,false);
-                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
+                    updateWinRate(interaction.user.id);
                     updatePoints(queryPoints(interaction.user.id),queryBetAnsw(interaction.user.id), interaction.user.id,false);
-
                     collector.stop();
                 }
 
