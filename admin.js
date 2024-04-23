@@ -11,11 +11,7 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
 
 //* Define the table schemas
 db.serialize(() => {
-<<<<<<< HEAD
-    db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER, betting VARCHAR, )');
-=======
     db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username VARCHAR, wins INTEGER, losses INTEGER, points INTEGER, leader_score INTEGER, win_streak INTEGER, last_word VARCHAR, win_rate DECIMAL, guesses INTEGER, items INTEGER, reveals INTEGER, extraPoints INTEGER, checkExtraPoints INTEGER, betting INTEGER)');
->>>>>>> 659bacacd4cff359dcfd8a42fbce4c583140f957
 });
 
 function getRandomWordFromDictionary(){
