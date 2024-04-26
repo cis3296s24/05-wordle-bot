@@ -29,16 +29,17 @@ function insertUser(id, username, wins, losses, points, score, streak, lastWord,
 }
 
 //* Updates the users win rate
-async function updateWinRate(wins, losses, id){
+async function updateWinRate(id){
     let sql = 'UPDATE users SET win_rate = ? WHERE id = ?';
-    let aWin = await wins;
-    let aLoss = await losses;
+    let aWin = await queryWin(id);
+    let aLoss = await queryLoss(id);
     let newWinRate = Math.floor((aWin/(aWin+aLoss)) * 100);
 
     db.run(sql, [newWinRate, id], (err) =>{
         if (err) return console.error(err.message);
     });
 }
+
 
 //* UPDATE WINS
 async function updateWin(win, id){
@@ -351,6 +352,7 @@ async function getRandom5LetterWordFromChatgpt() {
 
 }
 
+
 //* update item
 async function updateItem(items, id, used){
     let sql = 'UPDATE users SET items = ? WHERE id = ?';
@@ -458,7 +460,7 @@ module.exports = {
                     updateLastWords(randomWord,interaction.user.id);
                     updateWin(queryWin(interaction.user.id),interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,true);
-                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
+                    updateWinRate(interaction.user.id);
                     updatePoints(queryPoints(interaction.user.id),queryBetAnsw(interaction.user.id), interaction.user.id,true);
                     collector.stop();
                 }
@@ -467,9 +469,8 @@ module.exports = {
                     updateLoss(queryLoss(interaction.user.id),interaction.user.id);
                     updateLastWords(randomWord,interaction.user.id);
                     updateStreak(queryWinStreak(interaction.user.id),interaction.user.id,false);
-                    updateWinRate(queryWin(interaction.user.id),queryLoss(interaction.user.id),interaction.user.id);
+                    updateWinRate(interaction.user.id);
                     updatePoints(queryPoints(interaction.user.id),queryBetAnsw(interaction.user.id), interaction.user.id,false);
-
                     collector.stop();
                 }
 

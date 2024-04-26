@@ -46,7 +46,7 @@ module.exports = {
             betAns = (betValue.content);
             interaction.followUp(`Your answer was ${betAns}.You are now betting all your points.`);
             console.log(betAns);
-            updateBetting(betAns, interaction.user.id);
+            updateBetting((await betAns), interaction.user.id);
             collector.stop();
         });
 
