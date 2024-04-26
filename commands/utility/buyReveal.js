@@ -38,6 +38,7 @@ async function updateReveal(reveals, id){
         if (err) return console.error(err.message);
     });
 }
+
 //* query reveals
 function queryReveal(id){
     return new Promise((resolve,reject) => {
@@ -53,6 +54,7 @@ function queryReveal(id){
     });
 }
 
+// implement /buy_reveal
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('buy_reveal')

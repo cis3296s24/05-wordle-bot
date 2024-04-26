@@ -8,6 +8,7 @@ const db = new sqlite3.Database('./userdata.db', sqlite3.OPEN_READWRITE, (err) =
     if (err) return console.error(err.message);
 });
 
+// query users points
 function queryPoints(id){
     return new Promise((resolve,reject) => {
         let sql
@@ -21,6 +22,8 @@ function queryPoints(id){
         });
     });
 }
+
+// implement /points
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('points')
